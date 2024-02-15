@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Information</title>
+    <style>
+        .disabled {
+            opacity: 0.5; /* Add opacity to create a faded effect */
+            pointer-events: none; /* Disable pointer events to prevent editing */
+        }
+    </style>
+</head>
+<body>
+    <h2>Customer Information</h2>
+    <div id="formContainer">
+        <form id="CustomerForm">
+            <label for="Name">Name:</label><br>
+            <input type="text" id="name" name="name" required oninput="validateName(this)"><br><br>
+            
+            <label for="Employee_ID">Employee ID:</label><br>
+            <input type="number" id="Employee_ID" name="Employee ID" required><br><br>
+            
+            <label for="city">City:</label><br>
+            <select id="city" name="city" required>
+                <option value="" disabled selected>▼ Select City ▼</option>
+                <option value="New York">New York</option>
+                <option value="London">London</option>
+                <option value="Tokyo">Tokyo</option>
+            </select><br><br>
+            
+            <label>Gender:</label><br>
+            <input type="checkbox" id="male" name="gender" value="male" required>
+            <label for="male">Male</label>
+            <input type="checkbox" id="female" name="gender" value="female" required>
+            <label for="female">Female</label><br><br>
+            
+            <button type="button" onclick="saveForm()">Save</button>
+            <button type="button" onclick="editForm()">Edit</button>
+        </form>
+    </div>
+
+    <div id="savedData" style="display: none;">
+        <h2>Saved Data</h2>
+        <p><strong>Name:</strong> <span id="savedName"></span></p>
+        <p><strong>Employee ID:</strong> <span id="savedEmployeeID"></span></p>
+        <p><strong>City:</strong> <span id="savedCity"></span></p>
+        <p><strong>Gender:</strong> <span id="savedGender"></span></p>
+        <button type="button" onclick="editForm()">Edit</button>
+    </div>
+
+
+ <div id="displayArea" style="display: none;">
+        <h2>Display Area</h2>
+        <p>Name: <span id="displayedName"></span> </p>
+        <p>Employee ID: <span id="displayedEmployeeID"></span> </p>
+        <p>City: <span id="displayedCity"></span> </p>
+        <p>Gender: <span id="displayedGender"></span> </p>
+    </div>
+    <script>
+
+function validateName(input) {
+  var value = input.value;
+  var valid = /^[a-zA-Z\s]*$/.test(value);
+  
+  if (!valid) {
+    alert('Invalid input! Please enter letters only.');
+    input.value = value.slice(0, -1);
+  }
+}
+        function editForm() {
+            var savedData = JSON.parse(localStorage.getItem('customerData'));
+            if (savedData) {
+                document.getElementById('name').value = savedData.name;
+                document.getElementById('Employee_ID').value = savedData.employeeId;
+                document.getElementById('city').value = savedData.city;
+                if (savedData.gender === 'Male') {
+                    document.getElementById('male').checked = true;
+                } else if (savedData.gender === 'Female') {
+                    document.getElementById('female').checked = true;
+                }
+                alert('Data is editable now.');
+            }
+
+            var formContainer = document.getElementById('formContainer');
+            var savedDataDiv = document.getElementById('savedData');
+
+            // Show the form for editing and hide the saved data
+            formContainer.style.display = 'block';
+            savedDataDiv.style.display = 'none';
+
+            var inputs = document.querySelectorAll('#CustomerForm input, #CustomerForm select');
+            inputs.forEach(input => {
+                input.classList.remove('disabled'); // Remove the disabled class
+                input.disabled = false; // Enable the inputs
+            });
+        }
+
+        function saveForm() {
+            var name = document.getElementById('name').value;
+            var employeeId = document.getElementById('Employee_ID').value;
+            var city = document.getElementById('city').value;
+            var gender = '';
+            if (document.getElementById('male').checked) {
+                gender = 'Male';
+            } else if (document.getElementById('female').checked) {
+                gender = 'Female';
+            }
+
+            if (name && employeeId && city && gender) {
+                var formData = {
+                    name: name,
+                    employeeId: employeeId,
+                    city: city,
+                    gender: gender
+                };
+
+                localStorage.setItem('customerData', JSON.stringify(formData));
+                alert('Data saved!');
+                disableForm(); // Disable the form after saving
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        }
+
+  // Function to display entered data in the display area
+        function displayEnteredData() {
+            var savedData = JSON.parse(localStorage.getItem('customerData'));
+            if (savedData) {
+                document.getElementById('displayedName').textContent = savedData.name;
+                document.getElementById('displayedEmployeeID').textContent = savedData.employeeId;
+                document.getElementById('displayedCity').textContent = savedData.city;
+                document.getElementById('displayedGender').textContent = savedData.gender || 'Not specified';
+
+                document.getElementById('displayArea').style.display = 'block'; // Show the display area
+            }
+        }
+
+
+        function displaySavedData() {
+            var savedData = JSON.parse(localStorage.getItem('customerData'));
+            if (savedData) {
+                document.getElementById('savedName').textContent = savedData.name;
+                document.getElementById('savedEmployeeID').textContent = savedData.employeeId;
+                document.getElementById('savedCity').textContent = savedData.city;
+                document.getElementById('savedGender').textContent = savedData.gender || 'Not specified';
+                document.getElementById('savedData').style.display = 'block';
+            }
+        }
+
+        // Function to disable the form after saving
+        function disableForm() {
+            var inputs = document.querySelectorAll('#CustomerForm input, #CustomerForm select');
+            inputs.forEach(input => {
+                input.classList.add('disabled'); // Add the disabled class
+                input.disabled = true; // Disable the inputs
+            });
+        }
+
+        // Display saved data on page load
+        window.onload = function() {
+            displaySavedData();
+            disableForm(); // Disable the form initially
+        }
+    </script>
+</body>
+</html>
